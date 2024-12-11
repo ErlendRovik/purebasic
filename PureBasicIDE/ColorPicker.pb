@@ -1120,8 +1120,8 @@ Procedure ColorPicker_Name_Event(*Entry.ColorPickerData, Gadget, Type)
         If *Entry\First<0
           *Entry\First=0
         EndIf
-        If *Entry\First>*Palette\Count-*Entry\Rows
-          *Entry\First=*Palette\Count-*Entry\Rows
+        If *Entry\First>*Palette\Count-GetGadgetAttribute(#GADGET_Color_Scroll,#PB_ScrollBar_PageLength)
+          *Entry\First=*Palette\Count-GetGadgetAttribute(#GADGET_Color_Scroll,#PB_ScrollBar_PageLength)
         EndIf  
         SetGadgetState(#GADGET_Color_Scroll,*Entry\First)
         ColorPicker_Name_Update(*Entry)
