@@ -727,9 +727,35 @@ Procedure LoadPreferences()
       GetCompilerVersion(Compilers()\Executable$, @Compilers())
     EndIf
   Next i
+  
+  ; Ensures the C backend compiler is automatically added to the list for the PureBasic version which have one
+  ;
+  CompilerIf (#CompileWindows Or #CompileLinux) And (#CompileX86 Or #CompileX64)
+    CompilerIf #CompileWindows
+      CompilerExecutable$ = PureBasicPath$ + "Compilers\pbcompilerc.exe"
+    CompilerElse ; Linux
+      CompilerExecutable$ = PureBasicPath$ + "compilers/pbcompilerc"
+    CompilerEndIf
+    
+    Found = #False
+    ForEach Compilers()
+      If IsEqualFile(CompilerExecutable$, Compilers()\Executable$)
+        Found = #True
+        Break
+      EndIf
+    Next
+    
+    ; Not found in the additional compiler list, we can add it
+    If Not Found
+      AddElement(Compilers())
+      Compilers()\Executable$ = CompilerExecutable$
+      ; will try to get the info from the exe (and set it to validated)
+      GetCompilerVersion(Compilers()\Executable$, @Compilers())
+    EndIf
+  CompilerEndIf
+  
   SortCompilers()
-  
-  
+    
   ;- - CompilerDefaults
   PreferenceGroup("CompilerDefaults")
   LoadDialogPosition(@OptionWindowPosition)
@@ -743,6 +769,7 @@ Procedure LoadPreferences()
   OptionVistaUser            = ReadPreferenceLong("VistaUser", 0)
   OptionDPIAware             = ReadPreferenceLong("DPIAware",  1)
   OptionDllProtection        = ReadPreferenceLong("DllProtection", 0)
+  OptionSharedUCRT           = ReadPreferenceLong("SharedUCRT", 0)
   OptionThread               = ReadPreferenceLong("Thread",    0)
   OptionOnError              = ReadPreferenceLong("OnError",   0)
   OptionCPU                  = ReadPreferenceLong("CPU",       0)
@@ -1454,7 +1481,6 @@ Procedure SavePreferences()
       WritePreferenceString(Index$+"_Version", Compilers()\VersionString$)
     Next Compilers()
     
-    
     ;- - CompilerDefaults
     PreferenceComment("")
     PreferenceGroup("CompilerDefaults")
@@ -1469,6 +1495,7 @@ Procedure SavePreferences()
     WritePreferenceLong  ("VistaUser",          OptionVistaUser)
     WritePreferenceLong  ("DPIAware",           OptionDPIAware)
     WritePreferenceLong  ("DllProtection",      OptionDllProtection)
+    WritePreferenceLong  ("SharedUCRT",         OptionSharedUCRT)
     WritePreferenceLong  ("Thread",             OptionThread)
     WritePreferenceLong  ("OnError",            OptionOnError)
     WritePreferenceLong  ("CPU",                OptionCPU)
@@ -1742,6 +1769,7 @@ Procedure IsPreferenceChanged()
     If OptionVistaUser       <> GetGadgetState(#GADGET_Preferences_VistaUser): ProcedureReturn 1: EndIf
     If OptionDPIAware        <> GetGadgetState(#GADGET_Preferences_DPIAware): ProcedureReturn 1: EndIf
     If OptionDllProtection   <> GetGadgetState(#GADGET_Preferences_DllProtection): ProcedureReturn 1: EndIf
+    If OptionSharedUCRT      <> GetGadgetState(#GADGET_Preferences_SharedUCRT): ProcedureReturn 1: EndIf
     If OptionThread          <> GetGadgetState(#GADGET_Preferences_Thread): ProcedureReturn 1: EndIf
     If OptionOptimizer       <> GetGadgetState(#GADGET_Preferences_Optimizer): ProcedureReturn 1: EndIf
     If OptionOnError         <> GetGadgetState(#GADGET_Preferences_OnError): ProcedureReturn 1: EndIf
@@ -2152,6 +2180,7 @@ Procedure ApplyPreferences()
     OptionVistaUser       = GetGadgetState(#GADGET_Preferences_VistaUser)
     OptionDPIAware        = GetGadgetState(#GADGET_Preferences_DPIAware)
     OptionDllProtection   = GetGadgetState(#GADGET_Preferences_DllProtection)
+    OptionSharedUCRT      = GetGadgetState(#GADGET_Preferences_SharedUCRT)
     OptionThread          = GetGadgetState(#GADGET_Preferences_Thread)
     OptionOptimizer       = GetGadgetState(#GADGET_Preferences_Optimizer)
     OptionOnError         = GetGadgetState(#GADGET_Preferences_OnError)
@@ -3220,6 +3249,7 @@ Procedure OpenPreferencesWindow()
     SetGadgetState(#GADGET_Preferences_VistaUser, OptionVistaUser)
     SetGadgetState(#GADGET_Preferences_DPIAware, OptionDPIAware)
     SetGadgetState(#GADGET_Preferences_DllProtection, OptionDllProtection)
+    SetGadgetState(#GADGET_Preferences_SharedUCRT, OptionSharedUCRT)
     SetGadgetState(#GADGET_Preferences_Thread, OptionThread)
     SetGadgetState(#GADGET_Preferences_Optimizer, OptionOptimizer)
     SetGadgetState(#GADGET_Preferences_OnError, OptionOnError)
