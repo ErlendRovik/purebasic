@@ -807,7 +807,7 @@
 @Bold "Linux:"
 @Indent
 @Code
-  Procedure DragCallback(*Context.GdkDragContext, isStart)
+  Procedure DragCallback(*Context.GdkDragContext, isStart.l)
   
   EndProcedure
 @EndCode
